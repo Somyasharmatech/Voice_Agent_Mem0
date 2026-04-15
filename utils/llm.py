@@ -30,13 +30,16 @@ def generate_response(
     """
     logger.info(f"Generating LLM response. Provider='{provider}', Model='{model}'")
     
-    if provider.lower() == "openai":
+    if provider.lower() in ["openai", "groq"]:
         if not api_key:
-            logger.error("OpenAI API key missing.")
-            return "Error: OpenAI API key is missing."
+            logger.error(f"{provider} API key missing.")
+            return f"Error: {provider} API key is missing."
         
         try:
-            client = OpenAI(api_key=api_key)
+            # Groq uses identical SDK as OpenAI, just a different base URL
+            base_url = "https://api.groq.com/openai/v1" if provider.lower() == "groq" else None
+            client = OpenAI(api_key=api_key, base_url=base_url)
+            
             kwargs: Dict[str, Any] = {
                 "model": model,
                 "messages": [
@@ -48,11 +51,11 @@ def generate_response(
                 kwargs["response_format"] = {"type": "json_object"}
 
             response = client.chat.completions.create(**kwargs)
-            logger.info("Successfully received OpenAI response.")
+            logger.info(f"Successfully received {provider} response.")
             return response.choices[0].message.content or ""
         except Exception as e:
-            logger.error(f"OpenAI completion failed: {str(e)}", exc_info=True)
-            return f"OpenAI Error: {str(e)}"
+            logger.error(f"{provider} completion failed: {str(e)}", exc_info=True)
+            return f"{provider} Error: {str(e)}"
     
     elif provider.lower() == "ollama":
         base_url = os.getenv("OLLAMA_URL", "http://localhost:11434").rstrip("/")
