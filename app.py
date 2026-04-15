@@ -74,7 +74,7 @@ def render_sidebar() -> Tuple[str, str, str]:
         if not api_key:
             st.warning("⚠️ GROQ_API_KEY not found in server Secrets!")
         
-        model_choice = st.selectbox("Model", ["llama3-8b-8192", "llama3-70b-8192", "mixtral-8x7b-32768"])
+        model_choice = st.selectbox("Model", ["llama-3.1-8b-instant", "llama-3.3-70b-versatile", "mixtral-8x7b-32768"])
             
         st.markdown("---")
         st.subheader("🛠️ output/ Directory")
