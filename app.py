@@ -70,8 +70,10 @@ def render_sidebar() -> Tuple[str, str, str]:
         provider = "Groq"
         api_key = os.getenv("GROQ_API_KEY", "")
         
-        st.info("Get a free API key at [console.groq.com](https://console.groq.com)")
-        api_key = st.text_input("Groq API Key", value=api_key, type="password")
+        st.info("Powered securely by Groq API.")
+        if not api_key:
+            st.warning("⚠️ GROQ_API_KEY not found in server Secrets!")
+        
         model_choice = st.selectbox("Model", ["llama3-8b-8192", "llama3-70b-8192", "mixtral-8x7b-32768"])
             
         st.markdown("---")
@@ -220,8 +222,8 @@ def main():
                 if st.session_state.transcription:
                     st.success("Transcription Complete.")
                     with st.spinner("🤖 Detecting Intent..."):
-                        if provider == "OpenAI" and not api_key:
-                            st.error("Please provide an OpenAI API Key in the sidebar or via .env file.")
+                        if not api_key:
+                            st.error("Please provide a Groq API Key in your Hugging Face Secrets.")
                         else:
                             st.session_state.intents = detect_intents(
                                 st.session_state.transcription, 
