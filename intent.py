@@ -38,6 +38,8 @@ def detect_intents(
     - search_file: Requires 'query' or 'file_name'.
     - general_chat: Requires 'message' containing a helpful, friendly, and conversational AI response replying directly to the user. Do NOT just repeat the user's text back to them. Actually talk back to them as an AI assistant!
     
+    If the user is just talking, providing info, or asking questions, ALWAYS fallback to the 'general_chat' intent. Never return an empty intents list!
+    
     You MUST return ONLY a valid JSON object containing an "intents" key, which holds a list of dictionaries.
     
     Example input: "Create a python file called hello.py and write a hello world script in it."

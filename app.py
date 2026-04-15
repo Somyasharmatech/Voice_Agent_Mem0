@@ -245,12 +245,15 @@ def main():
                 st.markdown("**📝 Transcribed Text:**")
                 st.info(st.session_state.transcription)
                 
-            if st.session_state.intents:
+            if st.session_state.intents is not None:
                 st.markdown("**🎯 Detected Intents:**")
-                for idx, intent in enumerate(st.session_state.intents):
-                    st.markdown(f"<div class='intent-box'><b>Intent {idx+1}:</b> {intent.get('intent')} <br/> <small>{intent}</small></div>", unsafe_allow_html=True)
-                st.markdown("---")
-                process_intents(provider, api_key, model_choice)
+                if len(st.session_state.intents) == 0:
+                    st.info("No actionable intents were detected for this voice command! (The AI chose not to respond)")
+                else:
+                    for idx, intent in enumerate(st.session_state.intents):
+                        st.markdown(f"<div class='intent-box'><b>Intent {idx+1}:</b> {intent.get('intent')} <br/> <small>{intent}</small></div>", unsafe_allow_html=True)
+                    st.markdown("---")
+                    process_intents(provider, api_key, model_choice)
 
     with tab2:
         st.subheader("🔍 Output Directory Explorer")
