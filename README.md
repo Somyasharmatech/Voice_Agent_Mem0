@@ -1,3 +1,13 @@
+---
+title: Voice AI Agent
+emoji: 🎙️
+colorFrom: blue
+colorTo: indigo
+sdk: streamlit
+app_file: app.py
+pinned: false
+---
+
 # 🎙️ Voice-Controlled AI Agent
 
 ## 📌 Project Overview
