@@ -10,6 +10,10 @@ pinned: false
 
 # 🎙️ Voice-Controlled AI Agent
 
+## 🌐 Live Demo
+Access the live application directly in your browser without any installation:
+👉 **[Try the Voice Agent on Hugging Face](https://huggingface.co/spaces/somyasharma13/Voice_agent)**
+
 ## 📌 Project Overview
 The **Voice-Controlled AI Agent** is an enterprise-grade Streamlit application that acts as a secure, local-first intelligence assistant. It listens to voice commands, transcribes them using OpenAI Whisper, understands multi-step intents simultaneously via LLMs (OpenAI or Ollama), and autonomously performs tasks. 
 
