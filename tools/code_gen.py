@@ -33,6 +33,9 @@ def run_python_code(filepath):
     """
     Executes Python code safely using subprocess and returns the output.
     """
+    if os.getenv("ALLOW_CODE_EXECUTION", "false").lower() != "true":
+        return False, "Code execution is disabled for security reasons in this environment. Set ALLOW_CODE_EXECUTION=true to enable."
+
     if not filepath.endswith(".py"):
         return False, "Only Python files can be executed."
         

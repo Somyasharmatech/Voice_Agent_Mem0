@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: voice-ai-agent
+    env: docker
+    plan: free
+    autoDeploy: false
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OLLAMA_URL
+        value: "http://localhost:11434"
+      - key: ALLOW_CODE_EXECUTION
+        value: "false"

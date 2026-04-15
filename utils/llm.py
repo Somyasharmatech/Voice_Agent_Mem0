@@ -29,7 +29,8 @@ def generate_response(prompt, system_prompt="You are a helpful AI assistant.", p
             return f"OpenAI Error: {str(e)}"
     
     elif provider.lower() == "ollama":
-        url = "http://localhost:11434/api/generate"
+        base_url = os.getenv("OLLAMA_URL", "http://localhost:11434").rstrip("/")
+        url = f"{base_url}/api/generate"
         
         # When using JSON, instruct Ollama explicitly via format option
         payload = {

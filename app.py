@@ -41,6 +41,8 @@ with st.sidebar:
         model_choice = st.selectbox("Model", ["gpt-4o", "gpt-3.5-turbo", "gpt-4o-mini"])
     else:
         model_choice = st.text_input("Local Model Name", value="llama3")
+        ollama_url = st.text_input("Ollama Endpoint URL", value=os.getenv("OLLAMA_URL", "http://localhost:11434"))
+        os.environ["OLLAMA_URL"] = ollama_url
         
     st.markdown("---")
     st.subheader("🛠️ output/ Directory")
