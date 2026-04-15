@@ -36,7 +36,7 @@ def detect_intents(
     - write_code: Requires 'language', and 'prompt' (what code to write). Might also include 'file_name'.
     - summarize_text: Requires 'text' or 'topic' to summarize.
     - search_file: Requires 'query' or 'file_name'.
-    - general_chat: Requires 'message' containing your conversational response.
+    - general_chat: Requires 'message' containing a helpful, friendly, and conversational AI response replying directly to the user. Do NOT just repeat the user's text back to them. Actually talk back to them as an AI assistant!
     
     You MUST return ONLY a valid JSON object containing an "intents" key, which holds a list of dictionaries.
     
