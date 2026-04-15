@@ -200,7 +200,7 @@ def main():
             if not audio_value and not hasattr(st, "audio_input"):
                 st.warning("Your Streamlit version doesn't support audio_input. Falling back to file uploader.")
                 
-            uploaded_file = st.file_uploader("Or upload an audio file", type=['wav', 'mp3', 'm4a'])
+            uploaded_file = st.file_uploader("Or upload an audio or video file", type=['wav', 'mp3', 'm4a', 'mp4'])
             final_audio = audio_value or uploaded_file
             
             if final_audio and final_audio != st.session_state.current_audio:
@@ -209,11 +209,17 @@ def main():
                 st.session_state.intents = None
                 st.session_state.pending_actions = []
                 
-                with open("temp_audio.wav", "wb") as f:
+                # Extract correct extension to prevent FFmpeg crashes
+                ext = ".wav"
+                if hasattr(final_audio, "name"):
+                    ext = os.path.splitext(final_audio.name)[1]
+                
+                temp_filename = f"temp_audio{ext}"
+                with open(temp_filename, "wb") as f:
                     f.write(final_audio.getbuffer())
                     
-                with st.spinner("🎧 Transcribing audio..."):
-                    transcript_res = transcribe_audio("temp_audio.wav")
+                with st.spinner("🎧 Transcribing..."):
+                    transcript_res = transcribe_audio(temp_filename)
                     if "error" in transcript_res:
                         st.error(transcript_res["error"])
                     else:
