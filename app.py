@@ -67,21 +67,12 @@ def render_sidebar() -> Tuple[str, str, str]:
     """Renders the sidebar and returns configuration parameters."""
     with st.sidebar:
         st.header("⚙️ Configuration")
-        provider = st.selectbox("LLM Provider", ["OpenAI", "Groq", "Ollama"])
-        api_key = os.getenv("OPENAI_API_KEY", "")
-        model_choice = "gpt-4o"
+        provider = "Groq"
+        api_key = os.getenv("GROQ_API_KEY", "")
         
-        if provider == "OpenAI":
-            api_key = st.text_input("OpenAI API Key", value=api_key, type="password")
-            model_choice = st.selectbox("Model", ["gpt-4o", "gpt-3.5-turbo", "gpt-4o-mini"])
-        elif provider == "Groq":
-            st.info("Get a free API key at [console.groq.com](https://console.groq.com)")
-            api_key = st.text_input("Groq API Key", type="password")
-            model_choice = st.selectbox("Model", ["llama3-8b-8192", "llama3-70b-8192", "mixtral-8x7b-32768"])
-        else:
-            model_choice = st.text_input("Local Model Name", value="llama3")
-            ollama_url = st.text_input("Ollama Endpoint URL", value=os.getenv("OLLAMA_URL", "http://localhost:11434"))
-            os.environ["OLLAMA_URL"] = ollama_url
+        st.info("Get a free API key at [console.groq.com](https://console.groq.com)")
+        api_key = st.text_input("Groq API Key", value=api_key, type="password")
+        model_choice = st.selectbox("Model", ["llama3-8b-8192", "llama3-70b-8192", "mixtral-8x7b-32768"])
             
         st.markdown("---")
         st.subheader("🛠️ output/ Directory")
