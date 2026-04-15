@@ -251,7 +251,9 @@ def main():
                     st.info("No actionable intents were detected for this voice command! (The AI chose not to respond)")
                 else:
                     for idx, intent in enumerate(st.session_state.intents):
-                        st.markdown(f"<div class='intent-box'><b>Intent {idx+1}:</b> {intent.get('intent')} <br/> <small>{intent}</small></div>", unsafe_allow_html=True)
+                        i_type = intent.get('intent', 'unknown').replace('_', ' ').title()
+                        details_html = "".join([f"<li><b>{k.replace('_', ' ').title()}</b>: {v}</li>" for k, v in intent.items() if k != 'intent'])
+                        st.markdown(f"<div class='intent-box'><b>Intent {idx+1}:</b> {i_type} <ul style='margin-bottom:0px;'>{details_html}</ul></div>", unsafe_allow_html=True)
                     st.markdown("---")
                     process_intents(provider, api_key, model_choice)
 
