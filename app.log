@@ -1,0 +1,12 @@
+2026-04-15 18:27:44,633 - tools.file_ops - INFO - Attempting to create file: 'test_file.txt' (overwrite=False)
+2026-04-15 18:27:44,634 - tools.file_ops - INFO - Successfully created/written to file 'test_file.txt'.
+2026-04-15 18:27:44,652 - tools.file_ops - INFO - Attempting to create file: 'test_file.txt' (overwrite=False)
+2026-04-15 18:27:44,653 - tools.file_ops - INFO - Successfully created/written to file 'test_file.txt'.
+2026-04-15 18:27:44,653 - tools.file_ops - INFO - Attempting to create file: 'test_file.txt' (overwrite=False)
+2026-04-15 18:27:44,653 - tools.file_ops - WARNING - File creation aborted. 'test_file.txt' already exists and force_overwrite is False.
+2026-04-15 18:27:44,653 - tools.file_ops - INFO - Attempting to create file: 'test_file.txt' (overwrite=True)
+2026-04-15 18:27:44,654 - tools.file_ops - INFO - Successfully created/written to file 'test_file.txt'.
+2026-04-15 18:27:44,657 - memory - INFO - Memory saved successfully. Current memory size: 1 items.
+2026-04-15 18:27:44,678 - memory - INFO - Memory file successfully cleared.
+2026-04-15 18:27:44,680 - memory - INFO - Memory saved successfully. Current memory size: 1 items.
+2026-04-15 18:27:44,681 - memory - INFO - Memory file successfully cleared.
