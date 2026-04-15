@@ -38,14 +38,16 @@ def detect_intents(
     - search_file: Requires 'query' or 'file_name'.
     - general_chat: Requires 'message' containing your conversational response.
     
-    You MUST return ONLY a valid JSON list of dictionaries. Do not include markdown code blocks.
+    You MUST return ONLY a valid JSON object containing an "intents" key, which holds a list of dictionaries.
     
     Example input: "Create a python file called hello.py and write a hello world script in it."
     Example output JSON:
-    [
-      {"intent": "create_file", "file_name": "hello.py"},
-      {"intent": "write_code", "language": "python", "prompt": "write a hello world script", "file_name": "hello.py"}
-    ]
+    {
+      "intents": [
+        {"intent": "create_file", "file_name": "hello.py"},
+        {"intent": "write_code", "language": "python", "prompt": "write a hello world script", "file_name": "hello.py"}
+      ]
+    }
     """
     
     try:
@@ -73,9 +75,24 @@ def detect_intents(
         clean_text = clean_text[:-3]
         
     try:
-        intents = json.loads(clean_text)
+        parsed_json = json.loads(clean_text)
+        
+        # Handle the structure { "intents": [...] }
+        if isinstance(parsed_json, dict) and "intents" in parsed_json:
+            intents = parsed_json["intents"]
+        elif isinstance(parsed_json, dict):
+            # Fallback if the LLM returned a dict but missed the 'intents' key (e.g. {'intent': 'chat'})
+            if "intent" in parsed_json:
+                intents = [parsed_json]
+            else:
+                # If they returned arbitrary keys, try to wrap it as a general chat
+                intents = [{"intent": "general_chat", "message": json.dumps(parsed_json)}]
+        else:
+            intents = parsed_json
+            
         if not isinstance(intents, list):
-            intents = [intents] # Wrap in list if a single dict was returned
+            intents = [intents]
+            
         logger.info(f"Successfully parsed {len(intents)} intent(s).")
         return intents
     except json.JSONDecodeError as e:
