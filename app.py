@@ -148,43 +148,48 @@ def process_intents(provider: str, api_key: str, model_choice: str):
                     
         elif action_type in ["create_file", "write_code"]:
             fname = intent.get("file_name", "generated_snippet.py")
-            st.warning(f"⚠️ Action Required: Wants to {action_type} for `{fname}`")
+            action_key = f"action_{idx}_{fname}"
             
-            confirm_key = f"confirm_{idx}"
-            if st.button(f"Confirm {action_type} for {fname}", key=confirm_key):
-                with st.spinner(f"Executing {action_type}..."):
-                    if action_type == "create_file":
-                        success, msg_out, _ = create_file(fname, force_overwrite=True)
-                        if success:
-                            st.success(f"File {fname} created!")
-                            combined_response.append(f"I created the file {fname}.")
-                            save_memory({"type": "create_file", "file": fname})
-                        else:
-                            st.error(msg_out)
-                            
-                    elif action_type == "write_code":
-                        lang = intent.get("language", "python")
-                        prompt = intent.get("prompt", st.session_state.transcription)
-                        code = generate_code(prompt, lang, provider=provider, api_key=api_key, model=model_choice)
-                        success, msg_out, fpath = create_file(fname, content=code, force_overwrite=True)
+            if action_key not in st.session_state:
+                st.session_state[action_key] = {"completed": False, "success": False, "msg": "", "fpath": "", "code": "", "lang": ""}
+
+            if not st.session_state[action_key]["completed"]:
+                st.warning(f"⚠️ Action Required: Wants to {action_type} for `{fname}`")
+                if st.button(f"Confirm {action_type} for {fname}", key=f"confirm_{idx}"):
+                    with st.spinner(f"Executing {action_type}..."):
+                        if action_type == "create_file":
+                            success, msg_out, fpath = create_file(fname, force_overwrite=True)
+                            st.session_state[action_key] = {"completed": True, "success": success, "msg": msg_out, "fpath": fpath, "code": "", "lang": ""}
+                        elif action_type == "write_code":
+                            lang = intent.get("language", "python")
+                            prompt = intent.get("prompt", st.session_state.transcription)
+                            code = generate_code(prompt, lang, provider=provider, api_key=api_key, model=model_choice)
+                            success, msg_out, fpath = create_file(fname, content=code, force_overwrite=True)
+                            st.session_state[action_key] = {"completed": True, "success": success, "msg": msg_out, "fpath": fpath, "code": code, "lang": lang}
+                    # Use st.rerun() if available, otherwise beta_rerun
+                    if hasattr(st, "rerun"):
+                        st.rerun()
+                    else:
+                        st.experimental_rerun()
                         
-                        if success:
-                            st.success(f"Code written to {fname}!")
-                            with st.expander("Show Code"):
-                                st.code(code, language=lang)
-                            combined_response.append(f"I wrote the code to {fname}.")
-                            save_memory({"type": "write_code", "file": fname, "language": lang})
-                            
-                            if lang.lower() == "python":
-                                st.info("Python code detected. You can run it below.")
-                                if st.button(f"Run {fname}", key=f"run_{idx}"):
-                                    run_status, run_out = run_python_code(fpath)
-                                    if run_status:
-                                        st.markdown(f"**Output:**\n```\n{run_out}\n```")
-                                    else:
-                                        st.error(f"Execution Error:\n{run_out}")
-                        else:
-                            st.error(msg_out)
+            if st.session_state[action_key]["completed"]:
+                res = st.session_state[action_key]
+                if res["success"]:
+                    st.success(res["msg"])
+                    combined_response.append(f"I processed the file {fname}.")
+                    if res["code"]:
+                        with st.expander("Show Code"):
+                            st.code(res["code"], language=res["lang"])
+                        if res["lang"].lower() == "python":
+                            st.info("Python code detected. You can run it below.")
+                            if st.button(f"Run {fname}", key=f"run_{idx}"):
+                                run_status, run_out = run_python_code(res["fpath"])
+                                if run_status:
+                                    st.markdown(f"**Output:**\n```\n{run_out}\n```")
+                                else:
+                                    st.error(f"Execution Error:\n{run_out}")
+                else:
+                    st.error(res["msg"])
                             
         elif action_type == "error":
             st.error(intent.get("message", "Unknown error parsing intent."))
