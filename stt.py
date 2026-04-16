@@ -40,7 +40,7 @@ def transcribe_audio(
             _whisper_model = whisper.load_model(model_size)
             _current_model_size = model_size
 
-        result = _whisper_model.transcribe(audio_path)
+        result = _whisper_model.transcribe(audio_path, language="en")
         return {"text": result["text"]}
     except Exception as e:
         logger.error(f"Local Transcription failed: {str(e)}")
@@ -48,7 +48,7 @@ def transcribe_audio(
             logger.info("Switching to API fallback...")
             try:
                 with open(audio_path, "rb") as f:
-                    transcript = api_client.audio.transcriptions.create(model="whisper-1", file=f)
+                    transcript = api_client.audio.transcriptions.create(model="whisper-1", file=f, language="en")
                 return {"text": transcript.text}
             except Exception as api_e:
                 return {"error": f"Both local and API transcription failed. API Error: {str(api_e)}"}

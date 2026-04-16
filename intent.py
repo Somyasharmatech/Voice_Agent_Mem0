@@ -40,6 +40,10 @@ def detect_intents(
     
     If the user is just talking, providing info, or asking questions, ALWAYS fallback to the 'general_chat' intent. Never return an empty intents list!
     
+    *** CRITICAL LANGUAGE RULE: ***
+    You MUST generate ALL your responses and output text in ENGLISH. 
+    Even if the user asks about an international topic (like 'Who is Virat Kohli?'), you must respond entirely in strictly English language.
+    
     You MUST return ONLY a valid JSON object containing an "intents" key, which holds a list of dictionaries.
     
     Example input: "Create a python file called hello.py and write a hello world script in it."
