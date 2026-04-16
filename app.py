@@ -69,7 +69,9 @@ def render_sidebar():
         st.header("⚙️ Agent Settings")
         
         # 1. LLM Provider
-        provider = st.radio("LLM Provider", ["Ollama (Local)", "Groq (API)"], index=0)
+        # Default to Groq if we're on Hugging Face, otherwise Ollama
+        is_cloud = os.getenv("SPACE_ID") is not None
+        provider = st.radio("LLM Provider", ["Ollama (Local)", "Groq (API)"], index=1 if is_cloud else 0)
         provider_key = "ollama" if "Ollama" in provider else "groq"
         
         # 2. Model Selection
@@ -78,8 +80,8 @@ def render_sidebar():
             if ollama_models:
                 model_choice = st.selectbox("Select local model", ollama_models, index=ollama_models.index("llama3:latest") if "llama3:latest" in ollama_models else 0)
             else:
-                st.error("No local Ollama models found! Please ensure Ollama is running.")
-                model_choice = "llama3"
+                st.warning("⚠️ No local Ollama models found. Ensure Ollama is running.")
+                model_choice = st.text_input("Enter Ollama Model Name manually:", value="llama3")
         else:
             api_choice = st.selectbox("Select API model", ["llama-3.1-8b-instant", "mixtral-8x7b-32768", "llama-3.3-70b-versatile"])
             model_choice = api_choice
