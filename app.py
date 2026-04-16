@@ -180,6 +180,15 @@ def process_intents(provider: str, api_key: str, model_choice: str):
                     if res["code"]:
                         with st.expander("Show Code"):
                             st.code(res["code"], language=res["lang"])
+                        
+                        # Provide a download button for cloud users
+                        st.download_button(
+                            label="⬇️ Download File to Local Machine",
+                            data=res["code"],
+                            file_name=fname,
+                            mime="text/plain"
+                        )
+                        
                         if res["lang"].lower() == "python":
                             st.info("Python code detected. You can run it below.")
                             if st.button(f"Run {fname}", key=f"run_{idx}"):
