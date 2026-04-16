@@ -1,5 +1,4 @@
 
-title: Voice AI Agent
 
 
 # 🎙️ Local Voice-Controlled AI Agent
