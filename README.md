@@ -1,101 +1,69 @@
----
-title: Voice AI Agent
-emoji: 🎙️
-colorFrom: blue
-colorTo: indigo
-sdk: streamlit
-app_file: app.py
-pinned: false
----
+# 🎙️ Local Voice-Controlled AI Agent
 
-# 🎙️ Voice-Controlled AI Agent
+A robust, local-first AI assistant built with **Streamlit**, **Ollama**, and **OpenAI Whisper**. This agent allows you to control your local machine using voice commands, performing tasks like file creation, code generation, and text summarization with extreme privacy and zero-latency (when running locally).
 
-## 🌐 Live Demo
-Access the live application directly in your browser without any installation:
-👉 **[Try the Voice Agent on Hugging Face](https://huggingface.co/spaces/somyasharma13/Voice_agent)**
+## 🚀 Key Features
+- **Local Transcription:** Uses OpenAI Whisper (Tiny/Base/Small) to convert speech to text on your hardware.
+- **Intent Understanding:** Leverages **Ollama** (Llama 3/Mistral) to classify user intents and extract parameters.
+- **Dynamic Tool Execution:**
+  - 📁 **File Operations:** Create and manage files/folders in a secure `/output` directory.
+  - 💻 **Code Generation:** Generate and execute Python snippets locally.
+  - 📝 **Summarization:** Condense long transcriptions into concise summaries.
+- **Hardware Workarounds:** If local processing (Ollama/Whisper) is too slow or inefficient on your machine, the system includes an API-based fallback (Groq/OpenAI) as permitted by the assignment guidelines.
+- **Clean UI:** Simple, dark-mode Streamlit interface displaying transcriptions, intents, actions, and outputs.
 
-## 📌 Project Overview
-The **Voice-Controlled AI Agent** is an enterprise-grade Streamlit application that acts as a secure, local-first intelligence assistant. It listens to voice commands, transcribes them using OpenAI Whisper, understands multi-step intents simultaneously via LLMs (OpenAI or Ollama), and autonomously performs tasks. 
+## 🏗️ Architecture
+The system follows a modular pipeline:
+1. **Audio Input:** Captured via `st.audio_input` (Microphone) or File Upload.
+2. **STT (Speech-to-Text):** Local Whisper model processes the audio.
+3. **Intent Detection:** The transcription is sent to a local LLM (via Ollama) which returns structured JSON intents.
+4. **Tool Triggering:** Specific Python scripts are executed based on the detected intent (File Ops, Code Gen, etc.).
+5. **Output:** Results are displayed in the UI and stored in the `output/` folder.
 
-These tasks include generating code, executing Python scripts, summarizing text, and managing files. Security and isolation are prioritized: all outputs are safely generated within an isolated `output/` directory, destructive actions require explicit human confirmation, and remote code execution can be disabled via environment variables.
+## 🛠️ Setup Instructions
 
-## 🏗️ Architecture & Data Flow
+### Prerequisites
+- Python 3.9+
+- [Ollama](https://ollama.com/) installed and running.
+- [FFmpeg](https://ffmpeg.org/) (required for audio processing).
 
-```mermaid
-graph TD
-    A[User Voice Input] -->|Microphone / File| B(Streamlit UI: app.py)
-    B -->|Audio bytes| C{Whisper STT}
-    C -->|Fallback| D[OpenAI API]
-    C -->|Local| E[Local Whisper Model]
-    D -.->|Transcribed Text| F
-    E -.->|Transcribed Text| F[Intent Engine: intent.py]
-    
-    F -->|System Prompt| G{LLM Routing: utils/llm.py}
-    G -->|Ollama URL| H[Local Llama3]
-    G -->|API Key| I[OpenAI GPT-4o]
-    
-    H -.->|JSON Intents| J[Pipeline Processor]
-    I -.->|JSON Intents| J
-    
-    J -->|Code Intent| K[tools/code_gen.py]
-    J -->|File Intent| L[tools/file_ops.py]
-    J -->|Summary Intent| M[tools/summarizer.py]
-    
-    K -->|Subprocess Execution| N(output/ Directory)
-    L --> N
-    
-    J --> O[(memory.json)]
-    J --> P[gTTS Voice Output]
-```
-
-## 🛠️ Design Decisions (Assignment Notes)
-This project was designed with professional Software Engineering principles:
-- **Clean Architecture & SOLID:** The UI module (`app.py`) focuses strictly on presentation and state management, deferring logic to self-contained services (`utils/` and `tools/`).
-- **Robust Error Handling:** All errors are captured generically via a centralized Python `logging` instance instead of using bare `print()` statements, providing audit trails in `app.log`.
-- **Type Safety:** The entire codebase utilizes standard Python type hinting (`List`, `Dict`, `Optional`) to prevent runtime mismatches and build stronger intellisense.
-- **Security:** Arbitrary Python execution is protected behind the `ALLOW_CODE_EXECUTION` environment flag. If deploying the app publically via Docker, this is disabled by default to prevent Remote Code Execution (RCE) attacks.
-
-## 🚀 Setup Steps
-
-1. Clone the repository:
+### Installation
+1. **Clone the repository:**
    ```bash
-   git clone https://github.com/Somyasharmatech/Voice_Agent_Mem0.git
-   cd Voice_Agent_Mem0
+   git clone <your-repo-link>
+   cd local-voice-agent
    ```
-2. Create and activate a Virtual Environment (Recommended):
+2. **Setup virtual environment:**
    ```bash
    python -m venv venv
-   # Windows
-   venv\Scripts\activate
-   # Mac/Linux
-   source venv/bin/activate
+   source venv/bin/activate  # Linux/Mac
+   venv\Scripts\activate     # Windows
    ```
-3. Install Dependencies:
+3. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
-4. **Environment Variables**:
-   Copy the example environment file and configure your keys.
-   ```bash
-   cp .env.example .env
+4. **Environment Configuration:**
+   Create a `.env` file:
+   ```env
+   GROQ_API_KEY=your_key_here  # Optional fallback
+   OLLAMA_URL=http://localhost:11434
    ```
-   *Edit `.env` to add your OpenAI API Key or change the Ollama endpoint.*
 
-5. Optional: If using Ollama, ensure Ollama is installed and running `llama3` locally (`ollama run llama3`).
+### Running the Agent
+1. Start Ollama: `ollama run llama3`
+2. Launch the UI:
+   ```bash
+   streamlit run app.py
+   ```
 
-## ▶️ Application Usage
-Start the Streamlit application using:
-```bash
-streamlit run app.py
-```
-Open your browser to `http://localhost:8501`.
+## 🛡️ Safety & Security
+- **Isolated Workspace:** All file/folder operations are restricted to the `output/` directory.
+- **Human-in-the-Loop:** Destructive or file-writing actions require manual confirmation in the UI.
 
-## 🧪 Testing
-The application uses `pytest` to guarantee subsystem reliability. To run the automated unit tests, simply execute:
-```bash
-pytest tests/
-```
+## 📝 Assignment Deliverables
+- **Technical Article:** Located in [tech_article.md](tech_article.md).
+- **Video Script:** Located in [video_script.md](video_script.md).
 
-## ⚠️ Limitations
-- **Transcription Time**: Using local Whisper without a GPU can be slow. A fallback API integration strategy is outlined in `stt.py` if needed.
-- **Execution Safety**: While disabled by default in cloud deployments, local code execution enforces a timeout but lacks containerized sandboxing. Never run generated code that interfaces with critical system features blindly.
+---
+*Created for the "Voice-Controlled Local AI Agent" Project Assignment.*

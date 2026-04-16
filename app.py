@@ -11,7 +11,7 @@ load_dotenv()
 from stt import transcribe_audio
 from intent import detect_intents
 from memory import save_memory, get_memory, clear_memory
-from utils.llm import generate_response
+from utils.llm import generate_response, list_ollama_models
 from tools.file_ops import create_file, file_exists
 from tools.code_gen import generate_code, run_python_code
 from tools.summarizer import summarize_text
@@ -63,19 +63,33 @@ def speak_text(text: str):
         st.error(f"TTS Error: {e}")
 
 # ---- UI COMPONENTS ----
-def render_sidebar() -> Tuple[str, str, str]:
+def render_sidebar():
     """Renders the sidebar and returns configuration parameters."""
     with st.sidebar:
-        st.header("⚙️ Configuration")
-        provider = "Groq"
-        api_key = os.getenv("GROQ_API_KEY", "")
+        st.header("⚙️ Agent Settings")
         
-        st.info("Powered securely by Groq API.")
-        if not api_key:
-            st.warning("⚠️ GROQ_API_KEY not found in server Secrets!")
+        # 1. LLM Provider
+        provider = st.radio("LLM Provider", ["Ollama (Local)", "Groq (API)"], index=0)
+        provider_key = "ollama" if "Ollama" in provider else "groq"
         
-        model_choice = st.selectbox("Model", ["llama-3.1-8b-instant", "llama-3.3-70b-versatile", "mixtral-8x7b-32768"])
+        # 2. Model Selection
+        if provider_key == "ollama":
+            ollama_models = list_ollama_models()
+            if ollama_models:
+                model_choice = st.selectbox("Select local model", ollama_models, index=ollama_models.index("llama3:latest") if "llama3:latest" in ollama_models else 0)
+            else:
+                st.error("No local Ollama models found! Please ensure Ollama is running.")
+                model_choice = "llama3"
+        else:
+            api_choice = st.selectbox("Select API model", ["llama-3.1-8b-instant", "mixtral-8x7b-32768", "llama-3.3-70b-versatile"])
+            model_choice = api_choice
             
+        # 3. STT Configuration
+        st.markdown("---")
+        st.subheader("🎙️ STT Settings")
+        st.session_state.whisper_model = st.selectbox("Whisper Size", ["tiny", "base", "small"], index=1)
+        st.session_state.use_stt_proxy = st.toggle("Use API for transcription fallback", value=True)
+        
         st.markdown("---")
         st.subheader("🛠️ output/ Directory")
         if st.button("Refresh Files"):
@@ -91,9 +105,8 @@ def render_sidebar() -> Tuple[str, str, str]:
         if st.button("Clear Memory"):
             clear_memory()
             st.success("Memory cleared!")
-            logger.info("User cleared memory via sidebar.")
             
-    return provider, api_key, model_choice
+    return provider_key, os.getenv("GROQ_API_KEY", ""), model_choice
 
 def process_intents(provider: str, api_key: str, model_choice: str):
     """Handles the execution pipeline for detected intents."""
@@ -218,8 +231,15 @@ def main():
                 with open(temp_filename, "wb") as f:
                     f.write(final_audio.getbuffer())
                     
-                with st.spinner("🎧 Transcribing..."):
-                    transcript_res = transcribe_audio(temp_filename)
+                with st.spinner(f"🎧 Transcribing with Whisper {st.session_state.whisper_model}..."):
+                    # Use local Whisper with optional API fallback
+                    transcript_res = transcribe_audio(
+                        temp_filename, 
+                        model_size=st.session_state.whisper_model,
+                        use_api_fallback=st.session_state.use_stt_proxy,
+                        # We pass a simple wrapper or just the API key if the stt utility can handle it
+                    )
+                    
                     if "error" in transcript_res:
                         st.error(transcript_res["error"])
                     else:
@@ -227,18 +247,13 @@ def main():
                         
                 if st.session_state.transcription:
                     st.success("Transcription Complete.")
-                    with st.spinner("🤖 Detecting Intent..."):
-                        if not api_key:
-                            st.error("Please provide a Groq API Key in your Hugging Face Secrets.")
-                        else:
-                            st.session_state.intents = detect_intents(
-                                st.session_state.transcription, 
-                                provider=provider, 
-                                api_key=api_key, 
-                                model=model_choice
-                            )
-                            logger.info(f"Detected {len(st.session_state.intents)} intents.")
-                            
+                    with st.spinner(f"🤖 Detecting Intent using {model_choice}..."):
+                        st.session_state.intents = detect_intents(
+                            st.session_state.transcription, 
+                            provider=provider, 
+                            api_key=api_key, 
+                            model=model_choice
+                        )
         with col2:
             st.subheader("2. Processing Pipeline")
             if st.session_state.transcription:
