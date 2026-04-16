@@ -248,16 +248,31 @@ def main():
                     f.write(final_audio.getbuffer())
                     
                 with st.spinner(f"🎧 Transcribing with Whisper {st.session_state.whisper_model}..."):
-                    # Use local Whisper with optional API fallback
+                    # Build Groq API client to use as STT fallback if FFmpeg is missing
+                    groq_api_key = os.getenv("GROQ_API_KEY", api_key)
+                    stt_api_client = None
+                    if groq_api_key:
+                        try:
+                            from openai import OpenAI
+                            stt_api_client = OpenAI(
+                                api_key=groq_api_key,
+                                base_url="https://api.groq.com/openai/v1"
+                            )
+                        except Exception:
+                            pass
                     transcript_res = transcribe_audio(
-                        temp_filename, 
+                        temp_filename,
                         model_size=st.session_state.whisper_model,
                         use_api_fallback=st.session_state.use_stt_proxy,
-                        # We pass a simple wrapper or just the API key if the stt utility can handle it
+                        api_client=stt_api_client
                     )
                     
                     if "error" in transcript_res:
-                        st.error(transcript_res["error"])
+                        err_msg = transcript_res["error"]
+                        if "FFmpeg" in err_msg:
+                            st.warning(f"⚠️ {err_msg}")
+                        else:
+                            st.error(err_msg)
                     else:
                         st.session_state.transcription = transcript_res["text"]
                         
