@@ -1,14 +1,7 @@
----
-title: Voice AI Agent
-emoji: 🎙️
-colorFrom: blue
-colorTo: indigo
-sdk: streamlit
-app_file: app.py
-pinned: false
----
+
 
 # 🎙️ Local Voice-Controlled AI Agent
+live link: (https://huggingface.co/spaces/somyasharma13/Voice_agent?logs=container)
 
 A robust, local-first AI assistant built with **Streamlit**, **Ollama**, and **OpenAI Whisper**. This agent allows you to control your local machine using voice commands, performing tasks like file creation, code generation, and text summarization with extreme privacy and zero-latency (when running locally).
 
